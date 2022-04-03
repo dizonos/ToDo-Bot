@@ -16,10 +16,14 @@
 
 **Google Calendar**:
 - https://calendar.google.com/calendar/u/0/r
+- ![Google_Calendar_icon_(2020) svg](https://user-images.githubusercontent.com/72749159/161425226-1e114611-cfea-4a51-9460-601ffdb4517c.png)
+
 
 
 **Monday**:
 - https://monday.com/lp/mb/task/comparison/?utm_medium=capterra&utm_campaign=capterrataskmanagement&utm_source=GetApp
+- ![monday](https://user-images.githubusercontent.com/72749159/161425236-f788517f-b67e-40bb-a8b4-c8f3cf49703a.png)
+
 
 
 ## Системные требования
