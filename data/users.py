@@ -9,6 +9,7 @@ class User(SqlAlchemyBase):
 
     id = sqlalchemy.Column(sqlalchemy.Integer,
                            primary_key=True, autoincrement=True)
-    name = sqlalchemy.Column(sqlalchemy.Integer, unique=True)
+    user_id = sqlalchemy.Column(sqlalchemy.Integer, unique=True)
+    name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
 
     news = orm.relation("Tasks", back_populates='user')
