@@ -12,7 +12,7 @@ class Tasks(SqlAlchemyBase):
                            primary_key=True, autoincrement=True)
     user_id = sqlalchemy.Column(sqlalchemy.Integer,
                                 sqlalchemy.ForeignKey("users.id"))
-    personal_id = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
+    number = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     title = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     done = sqlalchemy.Column(sqlalchemy.BOOLEAN, nullable=False, default=False)
     time = sqlalchemy.Column(sqlalchemy.DATETIME, default=datetime.utcnow())
