@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 TOKEN = '5237014408:AAGW2SKLTeqzJoaGHFoWxgT-SMPohD0gYzw'
 
 MAIN_KEYBOARD = [['/add', '/complete'],
-                ['/show', '/help']]
+                 ['/show', '/help']]
 
 
 def start(update, context):
@@ -92,6 +92,56 @@ def enter_name(update, context):
     return ConversationHandler.END
 
 
+def complete_task(update, context):
+    show_tasks(update, context)
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.user_id == update.message.from_user.id).first()
+    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id).all()
+    tasks = []
+    sup_list = []
+    for i in range(len(sup)):
+        sup_list.append(sup[i].number)
+        if len(sup_list) == 4:
+            print(sup_list)
+            tasks.append(sup_list)
+            sup_list = []
+
+    tasks.append(sup_list)
+    if len(tasks[-1]) < 4:
+        tasks[-1].append('/cancel')
+    else:
+        tasks.append(['/cancel'])
+    markup = ReplyKeyboardMarkup(tasks, one_time_keyboard=True)
+    print(tasks)
+    update.message.reply_text('Какую зхадачу вы уже выполнили?', reply_markup=markup)
+    return 1
+
+
+def enter_number(update, context):
+    number = update.message.text
+    db_sess = db_session.create_session()
+    user = db_sess.query(User).filter(User.user_id == update.message.from_user.id).first()
+    tasks = db_sess.query(Tasks).filter(Tasks.user_id == user.id).all()
+    for i in tasks:
+        if i.number < int(number):
+            pass
+        elif i.number == int(number):
+            db_sess.delete(i)
+            db_sess.commit()
+        else:
+            i.number = i.number - 1
+            db_sess.commit()
+    markup = ReplyKeyboardMarkup(MAIN_KEYBOARD, one_time_keyboard=False)
+    update.message.reply_text('Поздравляю с ещё одной выполненгой задачей', reply_markup=markup)
+    return ConversationHandler.END
+
+
+def cancel_executing_task(update, context):
+    markup = ReplyKeyboardMarkup(MAIN_KEYBOARD, one_time_keyboard=False)
+    update.message.reply_text("Постарайтесь её выполнить", reply_markup=markup)
+    return ConversationHandler.END
+
+
 def show_tasks(update, context):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.user_id == update.message.from_user.id).first()
@@ -123,7 +173,17 @@ def main():
         },
         fallbacks=[CommandHandler('cancel', cancel_task)]
     )
+
+    executing_task = ConversationHandler(
+        entry_points=[CommandHandler('complete', complete_task)],
+        states={
+            1: [MessageHandler(Filters.text & ~Filters.command, enter_number)]
+        },
+        fallbacks=[CommandHandler('cancel', cancel_executing_task)]
+    )
+
     showing_task = CommandHandler('show', show_tasks)
+    dp.add_handler(executing_task)
     dp.add_handler(showing_task)
     dp.add_handler(greeting)
     dp.add_handler(adding_task)
