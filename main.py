@@ -105,7 +105,6 @@ def complete_task(update, context):
             print(sup_list)
             tasks.append(sup_list)
             sup_list = []
-
     tasks.append(sup_list)
     if len(tasks[-1]) < 4:
         tasks[-1].append('/cancel')
@@ -113,26 +112,34 @@ def complete_task(update, context):
         tasks.append(['/cancel'])
     markup = ReplyKeyboardMarkup(tasks, one_time_keyboard=True)
     print(tasks)
-    update.message.reply_text('Какую зхадачу вы уже выполнили?', reply_markup=markup)
+    update.message.reply_text('Какую задачу вы уже выполнили?', reply_markup=markup)
     return 1
 
 
 def enter_number(update, context):
     number = update.message.text
+    if not number.isdigit():
+        update.message.reply_text('Неправильный номер задачи')
+        return 1
+
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.user_id == update.message.from_user.id).first()
+    if not db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.number == int(number)).all():
+        update.message.reply_text('Неправильный номер задачи')
+        return 1
     tasks = db_sess.query(Tasks).filter(Tasks.user_id == user.id).all()
     for i in tasks:
         if i.number < int(number):
             pass
         elif i.number == int(number):
-            db_sess.delete(i)
+            i.done = True
             db_sess.commit()
         else:
             i.number = i.number - 1
             db_sess.commit()
     markup = ReplyKeyboardMarkup(MAIN_KEYBOARD, one_time_keyboard=False)
-    update.message.reply_text('Поздравляю с ещё одной выполненгой задачей', reply_markup=markup)
+    text = u'\U0001F389' + 'Поздравляю с ещё одной выполненой задачей' + u'\U0001F389'
+    update.message.reply_text(text, reply_markup=markup)
     return ConversationHandler.END
 
 
@@ -146,12 +153,31 @@ def show_tasks(update, context):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.user_id == update.message.from_user.id).first()
     text = f'Вот задачи, которые вам необходимо выполнить, {user.name}:\n'
-    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id).all()
+    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.done == 0).all()
     if not sup:
         text += 'Все задачи выполнены!'
+        update.message.reply_text(text)
+        return
     for i in sup:
-        text += f'{i.number}) {i.title}\n'
+        text += f'{i.number}) {i.title} ' + u'\U0000274C' + '\n'
+    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.done == 1).all()
+    if sup:
+        text += '\nЗадачи, которые вы уже выполнили\n'
+    for i in sup:
+        text += f'· {i.title} ' + u'\U00002705' + '\n'
     update.message.reply_text(text)
+
+
+def print_help(update, context):
+    update.message.reply_text('''Функции, которые может выполнить бот:
+    
+/show - показать все актуальные задачи на сегодняшний день и их состояния
+
+/add - добавить новую задачу в список дел
+
+/complete - убрать задачу из списка дел
+
+/help - показать подсказку по командам бота''')
 
 
 def main():
@@ -183,6 +209,9 @@ def main():
     )
 
     showing_task = CommandHandler('show', show_tasks)
+    ask_for_help = CommandHandler('help', print_help)
+
+    dp.add_handler(ask_for_help)
     dp.add_handler(executing_task)
     dp.add_handler(showing_task)
     dp.add_handler(greeting)
