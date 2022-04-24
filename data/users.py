@@ -11,5 +11,6 @@ class User(SqlAlchemyBase):
                            primary_key=True, autoincrement=True)
     user_id = sqlalchemy.Column(sqlalchemy.Integer, unique=True)
     name = sqlalchemy.Column(sqlalchemy.String, nullable=False)
+    time = sqlalchemy.Column(sqlalchemy.Integer, nullable=False, default=2)
 
     news = orm.relation("Tasks", back_populates='user')
