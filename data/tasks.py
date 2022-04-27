@@ -1,7 +1,6 @@
 from datetime import datetime
 import sqlalchemy
 from sqlalchemy import orm
-
 from .db_session import SqlAlchemyBase
 
 
@@ -15,7 +14,7 @@ class Tasks(SqlAlchemyBase):
     number = sqlalchemy.Column(sqlalchemy.Integer, nullable=False)
     title = sqlalchemy.Column(sqlalchemy.String, nullable=False)
     done = sqlalchemy.Column(sqlalchemy.BOOLEAN, nullable=False, default=False)
-    time = sqlalchemy.Column(sqlalchemy.DATETIME, default=datetime.utcnow())
+    time = sqlalchemy.Column(sqlalchemy.DATE, default=datetime.now())
 
     user = orm.relation('User')
 

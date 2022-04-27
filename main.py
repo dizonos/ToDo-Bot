@@ -31,7 +31,7 @@ def start(update, context):
         update.message.reply_text('Здравствуйте!\n'
                                   'Я - бот-помощник, который будет напоминать вам\n'
                                   'сделать или доделать какие-то задачи')
-        update.message.reply_text("Но для начала предаставьтесь")
+        update.message.reply_text("Но для начала представьтесь")
         return 1
     else:
         update.message.reply_text('Я уже вас знаю')
@@ -81,11 +81,12 @@ def enter_name(update, context):
     title = update.message.text
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.user_id == update.message.from_user.id).first()
-    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id).all()
+    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.done == 0).all()
     if not sup:
         num = 1
     else:
         num = sup[-1].number + 1
+    print(num)
     task = Tasks(user_id=user.id,
                  title=title,
                  number=num)
@@ -97,10 +98,19 @@ def enter_name(update, context):
 
 
 def complete_task(update, context):
-    show_tasks(update, context)
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.user_id == update.message.from_user.id).first()
-    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id).all()
+    text = f'Вот задачи, которые вам необходимо выполнить, {user.name}:\n'
+    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.done == 0).all()
+    if not sup:
+        text += 'Все задачи выполнены!'
+        update.message.reply_text(text)
+        return
+    for i in sup:
+        text += f'{i.number}) {i.title} ' + u'\U0000274C' + '\n'
+    update.message.reply_text(text)
+    db_sess = db_session.create_session()
+    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.done == 0).all()
     tasks = []
     sup_list = []
     for i in range(len(sup)):
@@ -130,7 +140,7 @@ def enter_number(update, context):
     if not db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.number == int(number)).all():
         update.message.reply_text('Неправильный номер задачи')
         return 1
-    tasks = db_sess.query(Tasks).filter(Tasks.user_id == user.id).all()
+    tasks = db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.done == 0).all()
     for i in tasks:
         if i.number < int(number):
             pass
@@ -148,7 +158,7 @@ def enter_number(update, context):
 
 def cancel_executing_task(update, context):
     markup = ReplyKeyboardMarkup(MAIN_KEYBOARD, one_time_keyboard=False)
-    update.message.reply_text("Постарайтесь её выполнить", reply_markup=markup)
+    update.message.reply_text("Постарайтесь выполнить, поставленные вами задачи", reply_markup=markup)
     return ConversationHandler.END
 
 
@@ -156,16 +166,23 @@ def show_tasks(update, context):
     db_sess = db_session.create_session()
     user = db_sess.query(User).filter(User.user_id == update.message.from_user.id).first()
     text = f'Вот задачи, которые вам необходимо выполнить, {user.name}:\n'
-    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.done == 0).all()
-    if not sup:
+    sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.done == 0, Tasks.time == datetime.datetime.now().date()).all()
+    overdue = db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.time < datetime.datetime.now().date(), Tasks.done == 0).all()
+    if overdue:
+        text += '\nЗадачи, оставшиеся с прошлых дней:\n'
+        for i in overdue:
+            text += u'\U0000274C' + f' {i.title} ' + '\n'
+    if not (sup or overdue):
         text += 'Все задачи выполнены!'
         update.message.reply_text(text)
         return
-    for i in sup:
-        text += f'{i.number}) {i.title} ' + u'\U0000274C' + '\n'
+    if sup:
+        text += '\nЗадачи, записанные на сегодня:\n'
+        for i in sup:
+            text += u'\U0000274C' + f' {i.title} ' + '\n'
     sup = db_sess.query(Tasks).filter(Tasks.user_id == user.id, Tasks.done == 1).all()
     if sup:
-        text += '\nЗадачи, которые вы уже выполнили\n'
+        text += '\nЗадачи, которые вы выполнили за сегодня:\n'
     for i in sup:
         text += u'\U00002705' + f' {i.title} ' + '\n'
     update.message.reply_text(text)
@@ -270,7 +287,7 @@ def main():
         states={
             1: [MessageHandler(Filters.text & ~Filters.command, acquaintance)],
         },
-        fallbacks=[CommandHandler('stop', stop)]
+        fallbacks=[CommandHandler('dkgWw12kjT3525k7nGeg', stop)]
     )
 
     adding_task = ConversationHandler(
