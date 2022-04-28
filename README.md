@@ -6,11 +6,11 @@
 
 скриншоты можно добавить после того как продукт будет доделан
 
-![скриншот1](https://sun9-16.userapi.com/s/v1/ig2/gQ1BJrCZhWE9Lny7Li3qBKZKTISsMLE0p1HkkuJ5YlCeQkq3vIZ10kH80XNt9q_EZ3B_up85YE4wSoFWxxN0Ly7-.jpg?size=200x200&quality=96&crop=212,3,792,792&ava=1 "скриншот1" )
-![скриншот2](https://sun1-23.userapi.com/s/v1/ig2/KL72jNAgmQK8DfB7nxkWACmhnHxKXoRWgvNkYCWqC2KWl_aS_z5thzG93YvwiZtGgkthw4gTU6WuvvZrDBm_J4ch.jpg?size=200x0&quality=96&crop=33,0,538,538&ava=1 "скриншот1" )
+![image](https://user-images.githubusercontent.com/72749159/165829246-fe90f611-3749-4bb5-b694-928a7fd2ddcd.png)
+![image](https://user-images.githubusercontent.com/72749159/165829388-922786ce-b64a-49b9-a966-40906ecf9639.png)
 
 
-[Официальный сайт](http://MyApp01.pythonanywhere.com/ "Официальный сайт")
+[Официальный сайт]
 
 ## На что похоже
 
@@ -33,13 +33,16 @@
 - требование 2
 
 **Рекомендуемые системные требования**:
-- требование 1
-- требование 2
+- Intel Core i5-3570
+- 8 gb RAM
+- NVIDIA GeForce GTX 970
+- 30 mb free space
 
 
 **Технологические стек**:
 - Python
 - Telegram Bot API
+- schedule
 
 ## Порядок запуска приложения
 
@@ -51,7 +54,7 @@ pyinstaller --onefile --noconsole main.py
 
 ## Что еще можно доделать
 
-Список того, что хотелось бы доделать
+...
 
 ## Ресурсы
 
