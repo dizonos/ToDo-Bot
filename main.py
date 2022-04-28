@@ -322,7 +322,7 @@ def main():
     dp.add_handler(showing_task)
     dp.add_handler(greeting)
     dp.add_handler(adding_task)
-    schedule.every().minute.do(announcement)
+    schedule.every().hour.do(announcement)
     updater.start_polling()
     while True:
         schedule.run_pending()
